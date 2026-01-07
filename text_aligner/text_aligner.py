@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import re
 from functools import partial
 from unicodedata import category
 
@@ -22,29 +23,33 @@ def agnostic(char: str, space_agnostic: bool = True, punctuation_agnostic: bool 
     cat = category(char)
     if space_agnostic and cat == "Zs":
         return True
-    if punctuation_agnostic and cat.startswith("P"):
+    if punctuation_agnostic and cat[0] in ("P", "S"):
         return True
     return False
 
 
 def align(reference: str, hypothesis: str, space_agnostic: bool = True, punctuation_agnostic: bool = True):
-    ref_chars, hyp_chars = list(reference), list(hypothesis)
-    matcher = SequenceMatcher(ref_chars, hyp_chars)
+    ref_chars = list(re.sub(r"\s+", " ", reference))
+    hyp_chars = list(re.sub(r"\s+", " ", hypothesis))
+    opcodes = SequenceMatcher(ref_chars, hyp_chars).get_opcodes()
     _agnostic = partial(agnostic, space_agnostic=space_agnostic, punctuation_agnostic=punctuation_agnostic)
 
     chars = []
-    for op, i, _, j, _ in matcher.get_opcodes():
-        if op == "delete":
-            if _agnostic(ref_chars[i]):
-                chars.append(ref_chars[i])
-        elif op == "insert":
-            if not _agnostic(hyp_chars[j]):
-                chars.append(hyp_chars[j])
-        elif op == "replace":
-            if _agnostic(ref_chars[i]) and _agnostic(hyp_chars[j]):
-                chars.append(ref_chars[i])
-            else:
-                chars.append(hyp_chars[j])
-        else:
+    prev_ref_agnostic_idx = -1
+    for k, (op, i, _, j, _) in enumerate(opcodes):
+        if op == "equal":
             chars.append(hyp_chars[j])
-    return "".join(chars)
+        else:
+            if i < len(ref_chars) and _agnostic(ref_chars[i]):
+                if i != prev_ref_agnostic_idx:
+                    prev_ref_agnostic_idx = i
+                    chars.append(ref_chars[i])
+            if op == "insert":
+                if _agnostic(hyp_chars[j]):
+                    if k + 1 < len(opcodes) and opcodes[k + 1][0] != "equal":
+                        chars.append(hyp_chars[j])
+                else:
+                    chars.append(hyp_chars[j])
+            elif op == "replace" and not _agnostic(hyp_chars[j]):
+                chars.append(hyp_chars[j])
+    return re.sub(r"\s+", " ", "".join(chars).strip())
