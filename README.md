@@ -1,6 +1,6 @@
 # Text Aligner
 
-[![PyPI](https://img.shields.io/pypi/v/compute-wer)](https://pypi.org/project/text-aligner)
+[![PyPI](https://img.shields.io/pypi/v/text-aligner)](https://pypi.org/project/text-aligner)
 [![License](https://img.shields.io/github/license/pengzhendong/text-aligner)](LICENSE)
 
 A Python library for aligning texts based on edit distance algorithms. This tool is particularly useful for comparing and aligning reference texts with hypothesis texts, such as in speech recognition evaluation.
