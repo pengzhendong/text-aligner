@@ -47,7 +47,8 @@ def align(reference: str, hypothesis: str, space_agnostic: bool = True, punctuat
             if op == "insert":
                 if _agnostic(hyp_chars[j]):
                     if k + 1 < len(opcodes) and opcodes[k + 1][0] != "equal":
-                        chars.append(hyp_chars[j])
+                        if not _agnostic(hyp_chars[opcodes[k + 1][3]]):
+                            chars.append(hyp_chars[j])
                 else:
                     chars.append(hyp_chars[j])
             elif op == "replace" and not _agnostic(hyp_chars[j]):
