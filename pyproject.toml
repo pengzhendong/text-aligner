@@ -5,14 +5,9 @@ build-backend = "hatchling.build"
 [project]
 name = "text-aligner"
 dynamic = ["version"]
-dependencies = [
-    "click",
-    "edit-distance",
-]
+dependencies = ["click", "rapidfuzz"]
 requires-python = ">=3.8"
-authors = [
-    { name = "Zhendong Peng", email = "pzd17@tsinghua.org.cn" }
-]
+authors = [{ name = "Zhendong Peng", email = "pzd17@tsinghua.org.cn" }]
 description = "Text Aligner"
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -31,13 +26,7 @@ align-text = "text_aligner.cli:main"
 
 [tool.ruff]
 line-length = 120
-lint.select = [
-    "E",
-    "F",
-    "I",
-    "W",
-    "UP",
-]
+lint.select = ["E", "F", "I", "W", "UP"]
 lint.ignore = ["F401"]
 
 [tool.hatch.version]

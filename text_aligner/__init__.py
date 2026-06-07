@@ -12,6 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from text_aligner.text_aligner import align
+from text_aligner.aligner import align
 
 __all__ = ["align"]

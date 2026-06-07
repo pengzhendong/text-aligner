@@ -19,8 +19,20 @@ from functools import partial
 
 import click
 
-from text_aligner.text_aligner import align
-from text_aligner.utils import read_scp
+from text_aligner.aligner import align
+
+
+def read_scp(scp_path: str) -> dict:
+    utt2text = {}
+    for line in codecs.open(scp_path, encoding="utf-8"):
+        arr = line.strip().split(maxsplit=1)
+        if len(arr) == 0:
+            continue
+        utt, text = arr[0], arr[1] if len(arr) > 1 else ""
+        if utt in utt2text and text != utt2text[utt]:
+            raise ValueError(f"Conflicting text found:\n{utt}\t{text}\n{utt}\t{utt2text[utt]}")
+        utt2text[utt] = text
+    return utt2text
 
 
 @click.command(help="Text aligner")
@@ -34,7 +46,12 @@ def main(ref, hyp, output_file, space_agnostic, punctuation_agnostic):
     assert os.path.exists(hyp) == input_is_file
     _align = partial(align, space_agnostic=space_agnostic, punctuation_agnostic=punctuation_agnostic)
 
-    results = []
+    fout = sys.stdout
+    if output_file is None:
+        fout.write("\n")
+    else:
+        fout = codecs.open(output_file, "w", encoding="utf-8")
+
     if input_is_file:
         refs = read_scp(ref)
         for line in codecs.open(hyp, encoding="utf-8"):
@@ -42,15 +59,8 @@ def main(ref, hyp, output_file, space_agnostic, punctuation_agnostic):
             if len(arr) == 0:
                 continue
             utt, text = arr[0], arr[1] if len(arr) > 1 else ""
-            results.append(f"{utt}\t{_align(refs[utt], text)}")
+            fout.write(f"{utt}\t{_align(refs[utt], text)}")
+            fout.write("\n")
     else:
-        results.append(_align(ref, hyp))
-
-    fout = sys.stdout
-    if output_file is None:
-        fout.write("\n")
-    else:
-        fout = codecs.open(output_file, "w", encoding="utf-8")
-    for result in results:
-        fout.write(result)
+        fout.write(_align(ref, hyp))
         fout.write("\n")

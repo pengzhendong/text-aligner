@@ -39,6 +39,19 @@ align-text "She is a well known writer" "He is a well-known writer."
 align-text ref.txt hyp.txt output.txt
 ```
 
+### Python API
+
+```python
+from text_aligner import align
+
+# Preserve reference formatting with hypothesis content
+align("AI cannot replace human creativity", "AI can not replace human creativity.")
+# Output: "AI cannot replace human creativity"
+
+align("He is a well-known writer.", "She is a well known writer")
+# Output: "She is a well-known writer."
+```
+
 ## Options
 
 - `-s, --space-agnostic`: Ignore differences in spacing (default: True)
